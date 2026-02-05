@@ -1,0 +1,58 @@
+import { BookRef } from '@/types/library';
+
+export const MOCK_BOOKS: BookRef[] = [
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-001',
+    title: 'The Ocean at the End of the Lane',
+    authors: ['Neil Gaiman'],
+    isbn13: '9780062255655',
+    publishedDate: '2013-06-18',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9780062255655-M.jpg',
+  },
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-002',
+    title: 'Self-Reliance and Other Essays',
+    authors: ['Ralph Waldo Emerson'],
+    isbn13: '9780486278070',
+    publishedDate: '1841-01-01',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9780486278070-M.jpg',
+  },
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-003',
+    title: 'Sonnets from the Portuguese',
+    authors: ['Elizabeth Barrett Browning'],
+    isbn13: '9780486268781',
+    publishedDate: '1850-01-01',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9780486268781-M.jpg',
+  },
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-004',
+    title: 'Beloved',
+    authors: ['Toni Morrison'],
+    isbn13: '9781400033416',
+    publishedDate: '1987-09-16',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9781400033416-M.jpg',
+  },
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-005',
+    title: 'The Prophet',
+    authors: ['Kahlil Gibran'],
+    isbn13: '9780394404288',
+    publishedDate: '1923-01-01',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9780394404288-M.jpg',
+  },
+  {
+    provider: 'mock-google-books',
+    providerId: 'bk-006',
+    title: 'A Thousand Splendid Suns',
+    authors: ['Khaled Hosseini'],
+    isbn13: '9781594483851',
+    publishedDate: '2007-05-22',
+    coverUrl: 'https://covers.openlibrary.org/b/isbn/9781594483851-M.jpg',
+  },
+];

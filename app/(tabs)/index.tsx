@@ -1,98 +1,173 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Colors, Fonts, Literary } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useLibraryStore } from '@/hooks/use-library-store';
+import { LibraryItem } from '@/types/library';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+function statusLabel(status: 'want_to_read' | 'reading' | 'read') {
+  if (status === 'want_to_read') {
+    return 'Want to Read';
+  }
 
-export default function HomeScreen() {
+  if (status === 'reading') {
+    return 'Reading';
+  }
+
+  return 'Read';
+}
+
+function LibraryCard({ item, textColor, mutedText, borderColor }: { item: LibraryItem; textColor: string; mutedText: string; borderColor: string }) {
+  if (item.kind === 'entry') {
+    return (
+      <View style={[styles.card, { borderColor }]}>
+        <Text style={[styles.badge, { color: mutedText }]}>ENTRY</Text>
+        <Text style={[styles.cardTitle, { color: textColor }]}>{item.title}</Text>
+        <Text numberOfLines={2} style={[styles.bodyText, { color: mutedText }]}>
+          {item.body}
+        </Text>
+        <Text style={[styles.metaText, { color: mutedText }]}>
+          {item.shelfCode} · {item.shelfLabel} · {item.visibility === 'public' ? 'Public' : 'Private'}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome to library!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={[styles.card, { borderColor }]}>
+      <Text style={[styles.badge, { color: mutedText }]}>BOOK</Text>
+      <Text style={[styles.cardTitle, { color: textColor }]}>{item.bookRef.title}</Text>
+      <Text numberOfLines={1} style={[styles.bodyText, { color: mutedText }]}>
+        {item.bookRef.authors.join(', ')}
+      </Text>
+      <Text style={[styles.metaText, { color: mutedText }]}>
+        {item.shelfCode} · {item.shelfLabel} · {statusLabel(item.readingStatus)}
+      </Text>
+    </View>
+  );
+}
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+export default function LibraryScreen() {
+  const theme = useColorScheme() ?? 'light';
+  const colors = Colors[theme];
+  const { libraryByShelf } = useLibraryStore();
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>My Library</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.mutedText }]}>
+          Personal shelves for entries and logged books.
+        </Text>
+
+        {libraryByShelf.map((section) => {
+          return (
+            <View key={section.shelf.code} style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionCode, { color: colors.mutedText }]}>{section.shelf.code}</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{section.shelf.label}</Text>
+              </View>
+              <Text style={[styles.sectionMeta, { color: colors.mutedText }]}>{section.items.length} item(s)</Text>
+              <View style={styles.cardList}>
+                {section.items.map((item) => {
+                  return (
+                    <LibraryCard
+                      key={item.id}
+                      item={item}
+                      textColor={colors.text}
+                      mutedText={colors.mutedText}
+                      borderColor={colors.border}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
+
+        {libraryByShelf.length === 0 ? (
+          <Text style={[styles.emptyState, { color: colors.mutedText }]}>No shelves yet. Create an Entry or log a Book from the Entry tab.</Text>
+        ) : null}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  safeArea: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
+  content: {
+    padding: Literary.spacing.lg,
+    paddingBottom: 120,
+    gap: Literary.spacing.md,
+  },
+  headerTitle: {
+    fontFamily: Fonts.serif,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: 0.3,
+  },
+  headerSubtitle: {
+    fontFamily: Fonts.sans,
+    fontSize: 15,
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  section: {
+    borderRadius: Literary.radius.lg,
+    borderWidth: 1,
+    padding: Literary.spacing.md,
+    gap: Literary.spacing.sm,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: Literary.spacing.sm,
+  },
+  sectionCode: {
+    fontFamily: Fonts.mono,
+    fontSize: 14,
+  },
+  sectionTitle: {
+    fontFamily: Fonts.serif,
+    fontSize: 24,
+  },
+  sectionMeta: {
+    fontFamily: Fonts.sans,
+    fontSize: 13,
+  },
+  cardList: {
+    gap: Literary.spacing.sm,
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: Literary.radius.md,
+    padding: Literary.spacing.md,
+    gap: 4,
+  },
+  badge: {
+    fontFamily: Fonts.mono,
+    fontSize: 11,
+    letterSpacing: 0.6,
+  },
+  cardTitle: {
+    fontFamily: Fonts.serif,
+    fontSize: 22,
+    lineHeight: 28,
+  },
+  bodyText: {
+    fontFamily: Fonts.sans,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  metaText: {
+    fontFamily: Fonts.sans,
+    fontSize: 12,
+  },
+  emptyState: {
+    fontFamily: Fonts.sans,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });
